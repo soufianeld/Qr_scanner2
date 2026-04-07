@@ -1,0 +1,135 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>QR Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    #reader { width: 300px; }
+    #history { margin-top: 20px; }
+    #history li { margin-bottom: 5px; }
+  </style>
+</head>
+<body>
+
+<h2>QR Scanner</h2>
+<div id="reader"></div>
+
+<p id="result"></p>
+
+<h3>Last 5 QR Codes:</h3>
+<ul id="history"></ul>
+
+<script>
+let lastScanned = "";
+let historyList = [];
+let scanner;
+
+function onScanSuccess(decodedText) {
+    if (decodedText === lastScanned) return; // نفس الكود ما يعاودش
+    lastScanned = decodedText;
+
+    // شرط: إذا الكود موجود من قبل، ما نسيفطش ولكن نوري رسالة
+    if(historyList.includes(decodedText)){
+        document.getElementById("result").innerText = "Duplicate code, ignored: " + decodedText;
+        return; // تجاهل التكرار
+    }
+
+    var url = "https://script.google.com/macros/s/AKfycbwyhRPVm0o5LsaG6kge7fd9fJjyMiKRvhq3UpQSV3yYn_reTGZdrqotiPfeMBFBxm4/exec?code=" + encodeURIComponent(decodedText);
+
+    fetch(url)
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById("result").innerText = "Saved: " + decodedText;
+
+            // تحديث قائمة آخر 5 QR codes
+            historyList.unshift(decodedText);
+            if(historyList.length > 5) historyList.pop();
+
+            let historyHTML = historyList.map(code => `<li>${code}</li>`).join('');
+            document.getElementById("history").innerHTML = historyHTML;
+        })
+        .catch(error => {
+            document.getElementById("result").innerText = "Error saving: " + error;
+        });
+}
+
+// تشغيل Scanner
+scanner = new Html5QrcodeScanner("reader", { fps: 10 });
+scanner.render(onScanSuccess);
+</script>
+
+</body>
+</html> -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>QR Scanner</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    #reader { width: 300px; }
+    #history { margin-top: 20px; }
+    #history li { margin-bottom: 5px; }
+    #result { font-weight: bold; }
+    .duplicate { color: red; }
+    .saved { color: green; }
+  </style>
+</head>
+<body>
+
+<h2>QR Scanner</h2>
+<div id="reader"></div>
+
+<p id="result"></p>
+
+<h3>Last 5 QR Codes:</h3>
+<ul id="history"></ul>
+
+<script>
+let lastScanned = "";
+let historyList = [];
+let scanner;
+
+function onScanSuccess(decodedText) {
+    if (decodedText === lastScanned) return; // ما يعاودش نفس الكود فوراً
+    lastScanned = decodedText;
+
+    const resultEl = document.getElementById("result");
+
+    // شرط: إذا الكود موجود من قبل (ما نزيدوش فالSheet ولا فالhistory)
+    if(historyList.includes(decodedText)){
+        resultEl.innerText = "Duplicate code! Already scanned before: " + decodedText;
+        resultEl.className = "duplicate"; // اللون أحمر
+        return; // تجاهل التكرار
+    }
+
+    // URL ديال Google Script
+    var url = "https://script.google.com/macros/s/AKfycbwyhRPVm0o5LsaG6kge7fd9fJjyMiKRvhq3UpQSV3yYn_reTGZdrqotiPfeMBFBxm4/exec?code=" + encodeURIComponent(decodedText);
+
+    fetch(url)
+        .then(response => response.text())
+        .then(data => {
+            resultEl.innerText = "Saved: " + decodedText;
+            resultEl.className = "saved"; // اللون أخضر
+
+            // تحديث قائمة آخر 5 QR codes بدون تكرار
+            historyList.unshift(decodedText);
+            if(historyList.length > 5) historyList.pop();
+
+            let historyHTML = historyList.map(code => `<li>${code}</li>`).join('');
+            document.getElementById("history").innerHTML = historyHTML;
+        })
+        .catch(error => {
+            resultEl.innerText = "Error saving: " + error;
+            resultEl.className = "duplicate"; // اللون أحمر
+        });
+}
+
+// تشغيل Scanner
+scanner = new Html5QrcodeScanner("reader", { fps: 10 });
+scanner.render(onScanSuccess);
+</script>
+
+</body>
+</html>
