@@ -1,272 +1,159 @@
-<!-- 
+
+
+
+
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>QR Scanner</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f5f5f5;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px;
-      color: #333;
-    }
+<meta charset="UTF-8">
+<title>QR Scanner</title>
+<script src="https://unpkg.com/html5-qrcode"></script>
 
-    h2 { color: #2c3e50; }
-
-    #reader {
-      width: 350px;
-      margin-top: 20px;
-      border: 2px solid #3498db;
-      border-radius: 10px;
-      background-color: #ecf0f1;
-      padding: 10px;
-    }
-
-    #result { margin-top: 20px; font-weight: bold; font-size: 1.2em; }
-    .saved { color: green; }
-    .duplicate { color: red; }
-
-    #history {
-      margin-top: 20px;
-      width: 350px;
-      list-style: none;
-      padding: 10px;
-      background-color: #fff;
-      border: 1px solid #bdc3c7;
-      border-radius: 8px;
-    }
-
-    #history li { padding: 5px 10px; border-bottom: 1px solid #ecf0f1; }
-    #history li:last-child { border-bottom: none; }
-  </style>
-</head>
-<body>
-
-<h2>QR Scanner</h2>
-<div id="reader"></div>
-
-<p id="result"></p>
-
-<h3>Last 5 QR Codes</h3>
-<ul id="history"></ul>
-
-<script>
-let lastScanned = "";
-let historyList = [];
-let scanner;
-
-// إنشاء عنصر صوتي beep صغير
-const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg"); // link صوت قصير جاهز
-
-function onScanSuccess(decodedText) {
-    if (decodedText === lastScanned) return;
-    lastScanned = decodedText;
-
-    const resultEl = document.getElementById("result");
-
-    // إذا الكود مكرر
-    if(historyList.includes(decodedText)){
-        resultEl.innerText = "Duplicate code! Already scanned: " + decodedText;
-        resultEl.className = "duplicate";
-        beep.play(); // صوت حتى على الكود المكرر إذا بغيت، أو ممكن نحيد
-        return;
-    }
-
-    // URL Google Script
-    var url = "https://script.google.com/macros/s/AKfycbwyhRPVm0o5LsaG6kge7fd9fJjyMiKRvhq3UpQSV3yYn_reTGZdrqotiPfeMBFBxm4/exec?code=" + encodeURIComponent(decodedText);
-
-    fetch(url)
-        .then(response => response.text())
-        .then(data => {
-            resultEl.innerText = "Saved: " + decodedText;
-            resultEl.className = "saved";
-
-            // تشغيل الصوت beep
-            beep.play();
-
-            // تحديث قائمة آخر 5 QR codes
-            historyList.unshift(decodedText);
-            if(historyList.length > 5) historyList.pop();
-
-            let historyHTML = historyList.map(code => `<li>${code}</li>`).join('');
-            document.getElementById("history").innerHTML = historyHTML;
-        })
-        .catch(error => {
-            resultEl.innerText = "Error saving: " + error;
-            resultEl.className = "duplicate";
-        });
+<style>
+body {
+  font-family: 'Segoe UI';
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px;
 }
 
-// تشغيل Scanner
-scanner = new Html5QrcodeScanner("reader", { fps: 10 });
-scanner.render(onScanSuccess);
-</script>
+#reader {
+  width: 350px;
+  margin-top: 20px;
+  border: 2px solid #3498db;
+  border-radius: 10px;
+  background-color: #ecf0f1;
+  padding: 10px;
+}
 
-</body>
-</html> -->
-<!-- ////// -->
+#result { margin-top: 20px; font-weight: bold; }
+.saved { color: green; }
+.duplicate { color: red; }
 
-
- <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>QR Scanner</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f5f5f5;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px;
-      color: #333;
-    }
-
-    h2 { color: #2c3e50; }
-
-    #reader {
-      width: 350px;
-      margin-top: 20px;
-      border: 2px solid #3498db;
-      border-radius: 10px;
-      background-color: #ecf0f1;
-      padding: 10px;
-    }
-
-    #result { margin-top: 20px; font-weight: bold; font-size: 1.2em; }
-    .saved { color: green; }
-    .duplicate { color: red; }
-
-    #history {
-      margin-top: 20px;
-      width: 350px;
-      list-style: none;
-      padding: 10px;
-      background-color: #fff;
-      border: 1px solid #bdc3c7;
-      border-radius: 8px;
-    }
-
-    #history li { padding: 5px 10px; border-bottom: 1px solid #ecf0f1; }
-    #history li:last-child { border-bottom: none; }
-  </style>
+#history {
+  margin-top: 20px;
+  width: 350px;
+  list-style: none;
+  padding: 10px;
+  background: white;
+  border-radius: 8px;
+}
+</style>
 </head>
+
 <body>
 
 <h2>QR Scanner</h2>
-<div id="reader"></div>
 
+<button onclick="startScanner()">▶️ Start Scanner</button>
+
+<div id="reader"></div>
 <p id="result"></p>
 
 <h3>Last 10 QR Codes</h3>
 <ul id="history"></ul>
-<button onclick="startScanner()">▶️ Start Scanner</button>
+
 <script>
 let lastScanned = "";
 let historyList = [];
+let isProcessing = false;
+let scanner;
 
-// صوت
-const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+// 🔊 Web Audio (100% خدام ف iPhone)
+let audioCtx;
 
-function onScanSuccess(decodedText) {
-    if (decodedText === lastScanned) return;
-    lastScanned = decodedText;
-
-    const resultEl = document.getElementById("result");
-
-    if(historyList.includes(decodedText)){
-        resultEl.innerText = "Duplicate code! Already scanned: " + decodedText;
-        resultEl.className = "duplicate";
-        beep.play();
-        return;
-    }
-
-    var url = "https://script.google.com/macros/s/AKfycbwyhRPVm0o5LsaG6kge7fd9fJjyMiKRvhq3UpQSV3yYn_reTGZdrqotiPfeMBFBxm4/exec?code=" + encodeURIComponent(decodedText);
-// ✅ عرض مباشر قبل أي fetch
-    resultEl.innerText = "⏳ Saving: " + decodedText;
-    resultEl.className = "saved";
-  beep.play();
-    fetch(url)
-    .then(res => res.text())
-    .then(() => {
-        resultEl.innerText = "Saved: " + decodedText;
-        resultEl.className = "saved";
-
-        beep.play();
-
-        historyList.unshift(decodedText);
-        if(historyList.length > 10) historyList.pop();
-
-        let historyHTML = historyList.map(code => `<li>${code}</li>`).join('');
-        document.getElementById("history").innerHTML = historyHTML;
-        
-      
-    })
-   .catch(err => {
-        resultEl.innerText = "Error: " + err;
-        resultEl.className = "duplicate";
-      });   
-  // fetch(url)
-  // .then(() => {
-  //   // اختياري: يمكن نزيد "✅ Saved" بعد ما يجي الجواب
-  //   resultEl.innerText = "✅ Saved: " + decodedText;
-  // })
-  // .catch(() => {
-  //   resultEl.innerText = "⚠️ Save failed";
-  //   resultEl.className = "duplicate";
-  // });
-}
-
-// 🔥 Scanner سريع
-// إعدادات محسنة للسرعة
-const config = {
-    fps: 15,           // زيادة السرعة لـ 20 إطار في الثانية
-    qrbox: { width: 250, height: 250 }, // تحديد منطقة المسح (باش يركز البروسيسور)
-    aspectRatio: 1.0,  // الحفاظ على أبعاد مربعة للصورة
-    rememberLastUsedCamera: true,
-    showTorchButtonIfSupported: true // إضافة زر الكشاف (الفلاش) كيساعد بزاف في الإضاءة الضعيفة
-};
-
-// تشغيل Scanner
-scanner = new Html5QrcodeScanner("reader", config, /* verbose= */ false);
-scanner.render(onScanSuccess);
-
-let audioUnlocked = false;
-
-// 🔊 unlock audio
-function unlockAudio() {
-  if (!audioUnlocked) {
-    const beep = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
-    beep.play().then(() => {
-      beep.pause();
-      beep.currentTime = 0;
-      audioUnlocked = true;
-    }).catch(()=>{});
+function initAudio() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
 }
 
-// ▶️ start scanner
-function startScanner() {
-  unlockAudio();
+function playBeep() {
+  if (!audioCtx) return;
 
-  const scanner = new Html5QrcodeScanner("reader", config, false);
-  scanner.render(onScanSuccess);
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = "square";
+  osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+
+  gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.08);
 }
 
+function onScanSuccess(decodedText) {
+
+  if (isProcessing) return;
+  if (decodedText === lastScanned) return;
+
+  isProcessing = true;
+  lastScanned = decodedText;
+
+  const resultEl = document.getElementById("result");
+
+  // ❌ duplicate
+  if (historyList.includes(decodedText)) {
+    resultEl.innerText = "❌ Duplicate: " + decodedText;
+    resultEl.className = "duplicate";
+    playBeep();
+    isProcessing = false;
+    return;
+  }
+
+  // ✅ عرض مباشر
+  resultEl.innerText = "⏳ Saving: " + decodedText;
+  resultEl.className = "saved";
+  playBeep();
+
+  // history
+  historyList.unshift(decodedText);
+  if (historyList.length > 10) historyList.pop();
+
+  document.getElementById("history").innerHTML =
+    historyList.map(code => `<li>${code}</li>`).join('');
+
+  // save background
+  fetch("https://script.google.com/macros/s/AKfycbwyhRPVm0o5LsaG6kge7fd9fJjyMiKRvhq3UpQSV3yYn_reTGZdrqotiPfeMBFBxm4/exec?code=" + encodeURIComponent(decodedText))
+  .then(() => {
+    resultEl.innerText = "✅ Saved: " + decodedText;
+  })
+  .catch(() => {
+    resultEl.innerText = "⚠️ Save failed";
+    resultEl.className = "duplicate";
+  })
+  .finally(() => {
+    setTimeout(() => { isProcessing = false; }, 800);
+  });
+}
+
+// config
+const config = {
+  fps: 15,
+  qrbox: { width: 250, height: 250 },
+  rememberLastUsedCamera: true,
+  showTorchButtonIfSupported: true
+};
+
+// ▶️ start scanner
+function startScanner() {
+  initAudio(); // 🔥 مهم بزاف للصوت
+
+  if (scanner) return; // باش مايتعاودش
+
+  scanner = new Html5QrcodeScanner("reader", config, false);
+  scanner.render(onScanSuccess);
+}
 </script>
 
 </body>
 </html>
-
-
-
-
-
-
